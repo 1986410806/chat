@@ -659,6 +659,7 @@ func truncateStringIfTooLong(s string) string {
 }
 
 // Convert relative filepath to absolute.
+// 相对路径转绝对路径
 func toAbsolutePath(base, path string) string {
 	if filepath.IsAbs(path) {
 		return path

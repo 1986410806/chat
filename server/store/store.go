@@ -83,6 +83,7 @@ func openAdapter(workerId int, jsonconf json.RawMessage) error {
 }
 
 // PersistentStorage defines methods used for interation with persistent storage.
+// 持久性存储定义了交互影响的持久性存储方法
 type PersistentStorageInterface interface {
 	Open(workerId int, jsonconf json.RawMessage) error
 	Close() error
@@ -109,6 +110,7 @@ var Store PersistentStorageInterface
 type storeObj struct{}
 
 // Open initializes the persistence system. Adapter holds a connection pool for a database instance.
+// 开启持久化 注册一个数据库连接池
 // 	 name - name of the adapter rquested in the config file
 //   jsonconf - configuration string
 func (storeObj) Open(workerId int, jsonconf json.RawMessage) error {
@@ -818,7 +820,9 @@ func (storeObj) GetAuthHandler(name string) auth.AuthHandler {
 }
 
 // GetLogicalAuthHandler returns an auth handler by logical name. If there is no handler by that
+// 获得逻辑鉴定处理程序返回一个鉴定处理程序逻辑名。如果没有处理程序
 // logical name it tries to find one by the hardcoded name.
+// 逻辑名试图找到一个硬编码的名称。
 func (storeObj) GetLogicalAuthHandler(name string) auth.AuthHandler {
 	name = strings.ToLower(name)
 	if len(authHandlerNames) != 0 {
@@ -830,7 +834,9 @@ func (storeObj) GetLogicalAuthHandler(name string) auth.AuthHandler {
 }
 
 // InitAuthLogicalNames initializes authentication mapping "logical handler name":"actual handler name".
+// Init身份验证逻辑名称初始化验证映射“逻辑处理程序名”:“实际处理程序名称”
 // Logical name must not be empty, actual name could be an empty string.
+// 逻辑名称不能是空的,实际的名字可以是一个空字符串
 func InitAuthLogicalNames(config json.RawMessage) error {
 	if config == nil || string(config) == "null" {
 		return nil

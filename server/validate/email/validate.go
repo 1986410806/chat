@@ -310,6 +310,7 @@ func (v *validator) PreCheck(cred string, _ map[string]interface{}) (string, err
 }
 
 // Send a request for confirmation to the user: makes a record in DB  and nothing else.
+// 向用户发送一个请求确认:使记录数据库
 func (v *validator) Request(user t.Uid, email, lang, resp string, tmpToken []byte) (bool, error) {
 	// Email validator cannot accept an immediate response.
 	if resp != "" {
@@ -359,6 +360,7 @@ func (v *validator) Request(user t.Uid, email, lang, resp string, tmpToken []byt
 }
 
 // ResetSecret sends a message with instructions for resetting an authentication secret.
+// 重置秘密发送一条消息,说明重置一个身份验证的秘密。
 func (v *validator) ResetSecret(email, scheme, lang string, tmpToken []byte, params map[string]interface{}) error {
 	// Normalize email to make sure Unicode case collisions don't lead to security problems.
 	email = strings.ToLower(email)
@@ -396,7 +398,9 @@ func (v *validator) ResetSecret(email, scheme, lang string, tmpToken []byte, par
 }
 
 // Check checks if the provided validation response matches the expected response.
+// 检查检查提供的验证响应匹配预期的响应。
 // Returns the value of validated credential on success.
+// 返回的值验证凭证上的成功。
 func (v *validator) Check(user t.Uid, resp string) (string, error) {
 	cred, err := store.Users.GetActiveCred(user, validatorName)
 	if err != nil {

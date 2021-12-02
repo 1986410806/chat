@@ -954,6 +954,7 @@ func (a *adapter) CredUpsert(cred *t.Credential) (bool, error) {
 }
 
 // CredGetActive returns the currently active credential record for the given method.
+// 信誉得到积极返回当前活动的凭证记录给定的方法。
 func (a *adapter) CredGetActive(uid t.Uid, method string) (*t.Credential, error) {
 	var cred t.Credential
 

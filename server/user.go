@@ -20,8 +20,10 @@ const (
 )
 
 // Process request for a new account.
+// 创建一个新用户
 func replyCreateUser(s *Session, msg *ClientComMessage, rec *auth.Rec) {
 	// The session cannot authenticate with the new account because  it's already authenticated.
+	// 会话无法验证新帐户,因为它已经通过身份验证。
 	if msg.Acc.Login && (!s.uid.IsZero() || rec != nil) {
 		s.queueOut(ErrAlreadyAuthenticated(msg.Id, "", msg.Timestamp))
 		logs.Warn.Println("create user: login requested while authenticated", s.sid)
@@ -386,6 +388,7 @@ func addCreds(uid types.Uid, creds []MsgCredClient, extraTags []string,
 // validatedCreds returns the list of validated credentials including those validated in this call.
 // Returns all validated methods including those validated earlier and now.
 // Returns either a full set of tags or nil for tags if tags are unchanged.
+// 验证信誉回报验证凭证的列表包括在这个调用验证。返回所有验证方法包括验证之前和现在。返回一个完整的标签或零标签如果标签不变。
 func validatedCreds(uid types.Uid, authLvl auth.Level, creds []MsgCredClient,
 	errorOnFail bool) ([]string, []string, error) {
 	// Check if credential validation is required.
@@ -948,18 +951,23 @@ func usersRequestFromCluster(req *UserCacheReq) {
 }
 
 // The go routine for processing updates to users cache.
+// 常规处理更新到用户缓存。
 func userUpdater() {
 	// Caches unread counters and numbers of topics the user's subscribed to.
+	// 缓存未读计数器和数字用户的订阅的主题。
 	usersCache := make(map[types.Uid]userCacheEntry)
 
 	// Unread counter updates blocked by IO on per user basis. We flush them when the IO completes.
+	// 未读计数被IO在每个用户的基础上更新。我们当IO完成冲洗它们
 	perUserBuffers := make(map[types.Uid][]bufferedUpdate)
 
 	// Push notification recipients blocked by IO (unread counters for some of the recipients
 	// are being read from the database) on the per user basis.
+	// 推送式通知收件人被IO(未读计数器的接受者 被从数据库读取)在每个用户的基础上
 	perUserPendingReceipts := make(map[types.Uid][]*pendingReceipt)
 
 	// All pending push receipts organized as a priority queue by the number of pending IOs.
+	// 所有未决推动收入组织为一个优先队列的数量等待IO
 	receiptQueue := pendingReceiptsQueue{}
 
 	// IO callback queue.

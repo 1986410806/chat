@@ -92,6 +92,7 @@ func (authenticator) UpdateRecord(rec *auth.Rec, secret []byte, remoteAddr strin
 }
 
 // Authenticate checks validity of provided token.
+// 验证检查的有效性提供令牌。
 func (ta *authenticator) Authenticate(token []byte, remoteAddr string) (*auth.Rec, []byte, error) {
 	var tl tokenLayout
 	dataSize := binary.Size(&tl)

@@ -892,6 +892,7 @@ func (s *Session) login(msg *ClientComMessage) {
 		return
 	}
 
+	// 判断uid == 0
 	if !s.uid.IsZero() {
 		// TODO: change error to notice InfoNoChange and return current user ID & auth level
 		// params := map[string]interface{}{"user": s.uid.UserId(), "authlvl": s.authLevel.String()}
@@ -918,6 +919,7 @@ func (s *Session) login(msg *ClientComMessage) {
 	}
 
 	// If authenticator did not check user state, it returns state "undef". If so, check user state here.
+	// 如果没有身份验证检查用户状态,它返回“undef”状态。如果是这样的话,检查用户状态。
 	if rec.State == types.StateUndefined {
 		rec.State, err = userGetState(rec.Uid)
 	}
@@ -941,6 +943,7 @@ func (s *Session) login(msg *ClientComMessage) {
 	if rec.Features&auth.FeatureValidated == 0 && len(globals.authValidators[rec.AuthLevel]) > 0 {
 		var validated []string
 		// Check responses. Ignore invalid responses, just keep cred unvalidated.
+		// 检查反应。忽略无效的反应,只是保持信誉未经验证。
 		if validated, _, err = validatedCreds(rec.Uid, rec.AuthLevel, msg.Login.Cred, false); err == nil {
 			// Get a list of credentials which have not been validated.
 			_, missing = stringSliceDelta(globals.authValidators[rec.AuthLevel], validated)
@@ -955,6 +958,7 @@ func (s *Session) login(msg *ClientComMessage) {
 }
 
 // authSecretReset resets an authentication secret;
+// 身份验证秘密重置重置一个身份验证的秘密;
 // params: "auth-method-to-reset:credential-method:credential-value",
 // for example: "basic:email:alice@example.com".
 func (s *Session) authSecretReset(params []byte) error {

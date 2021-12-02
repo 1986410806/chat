@@ -848,7 +848,7 @@ type Credential struct {
 	Resp string
 	// If credential was successfully confirmed
 	Done bool
-	// Retry count
+	// Retry count 重试次数
 	Retries int
 }
 

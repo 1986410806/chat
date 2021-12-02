@@ -3,6 +3,7 @@
  *  Description :
  *
  *    Main hub for processing events such as creating/tearing down topics,
+ *	  主要处理事件的中心建立/拆除等话题,之间路由消息的主题。
  *    routing messages between topics.
  *
  *****************************************************************************/

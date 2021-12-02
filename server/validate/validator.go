@@ -26,7 +26,9 @@ type Validator interface {
 
 	// ResetSecret sends a message with instructions for resetting an authentication secret.
 	//   cred: address to use for the message.
+	// 	 地址使用的消息。
 	//   scheme: authentication scheme being reset.
+	//   身份验证方案被重置。
 	//   lang: human language as reported in the session.
 	//   tmpToken: temporary authentication token
 	//   params: authentication params.

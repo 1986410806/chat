@@ -124,6 +124,7 @@ type credValidator struct {
 
 var globals struct {
 	// Topics cache and processing.
+	// 内容缓存和处理
 	hub *Hub
 	// Indicator that shutdown is in progress
 	shuttingDown bool
@@ -255,6 +256,7 @@ type configType struct {
 }
 
 func main() {
+	// 获取当前进程的工作目录
 	executable, _ := os.Executable()
 
 	logFlags := flag.String("log_flags", "stdFlags",
@@ -273,16 +275,19 @@ func main() {
 	pprofUrl := flag.String("pprof_url", "", "Debugging only! URL path for exposing profiling info. Disabled if not set.")
 	flag.Parse()
 
+	// 初始化日志组件
 	logs.Init(os.Stderr, *logFlags)
 
+	// 获取程序运行绝对地址
 	curwd, err := os.Getwd()
 	if err != nil {
 		logs.Err.Fatal("Couldn't get current working directory: ", err)
 	}
-
 	logs.Info.Printf("Server v%s:%s:%s; pid %d; %d process(es)",
 		currentVersion, executable, buildstamp,
-		os.Getpid(), runtime.GOMAXPROCS(runtime.NumCPU()))
+		os.Getpid(),
+		// 设置cpu的最大数量,可以执行 最大并行数
+		runtime.GOMAXPROCS(runtime.NumCPU()))
 
 	*configfile = toAbsolutePath(curwd, *configfile)
 	logs.Info.Printf("Using config from '%s'", *configfile)
@@ -314,14 +319,18 @@ func main() {
 	}
 
 	// Set up HTTP server. Must use non-default mux because of expvar.
+	// 创建 http 服务
 	mux := http.NewServeMux()
 
 	// Exposing values for statistics and monitoring.
+	// 暴露值统计和监测。
 	evpath := *expvarPath
 	if evpath == "" {
 		evpath = config.ExpvarPath
 	}
+	// 注册 debug/var
 	statsInit(mux, evpath)
+
 	statsRegisterInt("Version")
 	decVersion := base10Version(parseVersion(buildstamp))
 	if decVersion <= 0 {
@@ -330,10 +339,12 @@ func main() {
 	statsSet("Version", decVersion)
 
 	// Initialize serving debug profiles (optional).
+	// 初始化 ppoof 配置
 	servePprof(mux, *pprofUrl)
 
 	// Initialize cluster and receive calculated workerId.
 	// Cluster won't be started here yet.
+	// 初始化计算集群和接收员工Id。
 	workerId := clusterInit(config.Cluster, clusterSelf)
 
 	if *pprofFile != "" {
@@ -358,6 +369,7 @@ func main() {
 		logs.Info.Printf("Profiling info saved to '%s.(cpu|mem)'", *pprofFile)
 	}
 
+	// 初始化数据库连接池
 	err = store.Store.Open(workerId, config.Store)
 	if err != nil {
 		logs.Err.Fatal("Failed to connect to DB: ", err)
@@ -368,9 +380,11 @@ func main() {
 		logs.Info.Println("Closed database connection(s)")
 		logs.Info.Println("All done, good bye")
 	}()
+	// 注册系统监控
 	statsRegisterDbStats()
 
 	// API key signing secret
+	// api 密匙
 	globals.apiKeySalt = config.APIKeySalt
 
 	err = store.InitAuthLogicalNames(config.Auth["logical_names"])
@@ -406,7 +420,9 @@ func main() {
 	// Process validators.
 	for name, vconf := range config.Validator {
 		// Check if validator is restrictive. If so, add validator name to the list of restricted tags.
+		// 检查是否验证器是有限制的。如果是这样,限制的列表标签添加验证器名称。
 		// The namespace can be restricted even if the validator is disabled.
+		// 命名空间可以限制即使 validator 是禁用的
 		if vconf.AddToTags {
 			if strings.Contains(name, ":") {
 				logs.Err.Fatalln("acc_validation names should not contain character ':'", name)
@@ -536,12 +552,15 @@ func main() {
 	}()
 
 	// Keep inactive LP sessions for 15 seconds
+	// 保持不活跃的LP会话,持续15秒
 	globals.sessionStore = NewSessionStore(idleSessionTimeout + 15*time.Second)
 	// The hub (the main message router)
+	// 中心(路由器)的主要信
 	globals.hub = newHub()
 
-	// Start accepting cluster traffic.
+	// Start accepting cluster traffic
 	if globals.cluster != nil {
+		// 启动集群
 		globals.cluster.start()
 	}
 
@@ -551,9 +570,11 @@ func main() {
 	}
 
 	// Initialize plugins.
+	// 初始化插件
 	pluginsInit(config.Plugin)
 
 	// Initialize users cache
+	// 初始化用户缓存
 	usersInit()
 
 	// Set up gRPC server, if one is configured
@@ -631,12 +652,14 @@ func main() {
 
 	// Handle websocket clients.
 	mux.HandleFunc(config.ApiPath+"v0/channels", serveWebSocket)
-	// Handle long polling clients. Enable compression.
+	// Handle long polling clients. Enable compression. 长轮询
 	mux.Handle(config.ApiPath+"v0/channels/lp", gh.CompressHandler(http.HandlerFunc(serveLongPoll)))
+
+	// 大文件处理
 	if config.Media != nil {
-		// Handle uploads of large files.
+		// Handle uploads of large files. 大文件处理
 		mux.Handle(config.ApiPath+"v0/file/u/", gh.CompressHandler(http.HandlerFunc(largeFileReceive)))
-		// Serve large files.
+		// Serve large files. 大文件
 		mux.Handle(config.ApiPath+"v0/file/s/", gh.CompressHandler(http.HandlerFunc(largeFileServe)))
 		logs.Info.Println("Large media handling enabled", config.Media.UseHandler)
 	}

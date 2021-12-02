@@ -93,6 +93,7 @@ func (a *adapter) getContextForTx() (context.Context, context.CancelFunc) {
 }
 
 // Open initializes database session
+// 初始化数据库链接
 func (a *adapter) Open(jsonconfig json.RawMessage) error {
 	if a.db != nil {
 		return errors.New("mysql adapter is already connected")
@@ -108,7 +109,6 @@ func (a *adapter) Open(jsonconfig json.RawMessage) error {
 	if err = json.Unmarshal(jsonconfig, &config); err != nil {
 		return errors.New("mysql adapter failed to parse config: " + err.Error())
 	}
-
 	if dsn := config.FormatDSN(); dsn != defaultCfg.FormatDSN() {
 		// MySql config is specified. Use it.
 		a.dbName = config.DBName
@@ -149,6 +149,7 @@ func (a *adapter) Open(jsonconfig json.RawMessage) error {
 	err = a.db.Ping()
 	if isMissingDb(err) {
 		// Ignore missing database here. If we are initializing the database
+		// 忽略缺少数据库。如果我们是初始化数据库
 		// missing DB is OK.
 		err = nil
 	}
